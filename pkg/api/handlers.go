@@ -15,7 +15,7 @@ type Server struct {
 }
 
 var (
-	HelloRegex = regexp.MustCompile("^/hello/[a-zA-Z]+$")
+	HelloRegex = regexp.MustCompile("^/hello/.+$")
 )
 
 func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +36,8 @@ func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debug("hello handler called")
 
+	//Failing early is safer. it duplicates the switch statement but we don't
+	//know what can come with non-syupported methods in terms of path, body, and formats.
 	if r.Method != http.MethodGet && r.Method != http.MethodPut {
 		s.Logger.Error(fmt.Errorf("method %s not allowed", r.Method))
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -49,8 +51,28 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	username := strings.Split(r.URL.Path, "/")[2]
+	if !IsUsernameValid(username) {
+		log.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	}
 
-	if r.Method == http.MethodPut {
+	switch r.Method {
+	case http.MethodGet:
+		user := DateOfBirth{Username: username}
+		birthdayMessage, err := user.Get()
+		if err != nil {
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		respBody, err := json.Marshal(birthdayMessage)
+		_, err = w.Write([]byte(respBody))
+		if err != nil {
+			log.WithFields(log.Fields{"username": username}).Error(fmt.Errorf("failed to write response: %w", err))
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+
+	case http.MethodPut:
 		var dateOfBirth DateOfBirth
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -76,6 +98,6 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
 		w.WriteHeader(http.StatusNoContent)
-		
+
 	}
 }

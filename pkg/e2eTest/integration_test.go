@@ -69,11 +69,11 @@ func TestHelloGetIntegration(t *testing.T) {
 		expectedStatus int
 		expectedBody   string
 	}{
-		{"valid username, in 3 days", "asdasda", http.MethodGet, http.StatusOK, fmt.Sprintf(`{ "message": "Hello, %s! Your birthday is in %d day(s)"}`, "asdasda", 3)},
-		{"valid username, today", "asdasda", http.MethodGet, http.StatusOK, fmt.Sprintf(`{ "message": "Hello, %s! Happy birthday!"}`, "asdasda")},
+		{"valid username, in 3 days", "asdasda", http.MethodGet, http.StatusOK, fmt.Sprintf(`{"message":"Hello, %s! Your birthday is in %d day(s)"}`, "asdasda", 3)},
+		{"valid username, today", "asdasda", http.MethodGet, http.StatusOK, fmt.Sprintf(`{"message":"Hello, %s! Happy birthday!"}`, "asdasda")},
 		{"invalid username pattern", "asd123", http.MethodGet, http.StatusBadRequest, ""},
 	}
-
+	
 	for _, tc := range cases {
 		t.Run(tc.testName, func(t *testing.T) {
 			req := httptest.NewRequest(tc.method, fmt.Sprintf("/hello/%s", tc.username), nil)

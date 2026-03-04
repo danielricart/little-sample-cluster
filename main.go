@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"little-sample-cluster/pkg/api"
 	"net/http"
 	"os"
 )
@@ -21,10 +22,11 @@ func main() {
 
 	logger.Info("Starting Hello Birthday...")
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
+	server := api.Server{
+		Logger: logger,
+	}
+
+	http.HandleFunc("/health", server.HealthHandler)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

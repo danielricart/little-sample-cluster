@@ -11,6 +11,9 @@ self-made decisions:
 - if PUT payload does not match, response will be 400
 
 ## DONE
+### AI Usage
+to speed up boilerplate for e2e tests and multi-case tests.
+to speed up http method filtering. 
 
 ### meta
 - build action for GHA on merge-to-main and PR to Main
@@ -49,3 +52,6 @@ in a production ready env this would need:
 - argocd eases the management of all the cluster applications and client applications
 - dedicated namespace for the application
 - dedicated namespace for hte database (this is an optional pattern)
+- prometheus for metricsd
+- cluster-metrics for extraction of resource usage 
+- 

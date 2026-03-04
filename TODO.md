@@ -9,6 +9,8 @@ self-made decisions:
 ```
 - If GET username is not found, response will be 404
 - if PUT payload does not match, response will be 400
+- username can be passed either uppercase or lowercase. or mixed. it's always normalized in DB to lowercase. 
+
 
 ## DONE
 ### AI Usage

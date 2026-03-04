@@ -14,12 +14,13 @@ self-made decisions:
 
 ### meta
 - build action for GHA on merge-to-main and PR to Main
+- also run tests on GHA
 
 ### application
 - logging in JSON output for easier parsing / indexing. It penalizes raw-reading logs
 - `SERVER_PORT` envVar. defaults to 8089. 
 - endpoint /health. always responds `HTTP200 OK`
-- 
+- e2e tests for /health
 
 ## TODO
 

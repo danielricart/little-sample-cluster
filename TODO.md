@@ -11,6 +11,9 @@ self-made decisions:
 - if PUT payload does not match, response will be 400
 
 ## DONE
+### AI Usage
+to speed up boilerplate for e2e tests and multi-case tests.
+to speed up http method filtering. 
 
 ### meta
 - build action for GHA on merge-to-main and PR to Main
@@ -21,21 +24,24 @@ self-made decisions:
 - `SERVER_PORT` envVar. defaults to 8089. 
 - endpoint /health. always responds `HTTP200 OK`
 - e2e tests for /health
-
-## TODO
-
-### application
 - expose GET /hello/<username>
-  - YYYY-MM-DD must be a date before today's date.  
+  - YYYY-MM-DD must be a date before today's date.
   - response content: { “dateOfBrith”: “YYYY-MM-DD” }
   - response: 200 OK
 - expose PUT /hello/<username> { “dateOfBrith”: “YYYY-MM-DD” }
   - Save or updates a given username and date of birth in a database
   - response 204 No Content
+
+## TODO
+
+### application
+- pending store and fetch from DB. some tests fail because of this
 - DB respository for a simple struct with username and dateOfBirth
 - DB client
 - DB settings as env
 
+- expose prometheus metrics. total for inserted Date of birth, histogram with 12 buckets
+- 
 - helm chart for application
 
 ### infrastructure
@@ -49,3 +55,6 @@ in a production ready env this would need:
 - argocd eases the management of all the cluster applications and client applications
 - dedicated namespace for the application
 - dedicated namespace for hte database (this is an optional pattern)
+- prometheus for metricsd
+- cluster-metrics for extraction of resource usage 
+- 

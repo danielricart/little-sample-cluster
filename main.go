@@ -27,6 +27,7 @@ func main() {
 	}
 
 	http.HandleFunc("/health", server.HealthHandler)
+	http.HandleFunc("/hello", server.HelloHandler)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

@@ -83,6 +83,9 @@ func (s *HelloServer) Get(d *DateOfBirth) (*BirthdayMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	if birthDate == nil {
+		return nil, nil
+	}
 	d.DateOfBirth = birthDate.Format("2006-01-02")
 	d.TilBirth = d.daysTilBirth()
 

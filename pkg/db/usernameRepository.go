@@ -2,8 +2,10 @@ package db
 
 import (
 	"database/sql"
-	log "github.com/sirupsen/logrus"
+	"errors"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type User struct {
@@ -34,6 +36,9 @@ func (u *UserRepositoryImpl) GetBirthDateByUsername(username string) (*time.Time
 
 	err := u.db.QueryRow(query, username).Scan(&user.Username, &user.DateOfBirth)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		u.logger.Error(err)
 		return nil, err
 	}

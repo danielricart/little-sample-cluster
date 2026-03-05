@@ -115,6 +115,7 @@ func TestHelloGetIntegration(t *testing.T) {
 				DateOfBirth: today,
 			}},
 		{"invalid username pattern", "asd123", http.MethodGet, http.StatusBadRequest, "", api.DateOfBirth{}},
+		{"invalid username does not exist", "idontexist", http.MethodGet, http.StatusNotFound, "", api.DateOfBirth{}},
 	}
 
 	for _, tc := range cases {
@@ -155,6 +156,7 @@ func TestHelloPutIntegration(t *testing.T) {
 		expectedStatus       int
 		expectedResponseBody string
 	}{
+		// All users here use the same date_of_birth. this eases the validations on DB.
 		{"valid username missing body", "asdasda", ``, http.MethodPut, http.StatusBadRequest, ""},
 		{"valid username, wrong date", "asdasda", fmt.Sprintf(`{"dateOfBirth": "%s"}`, futureDate), http.MethodPut, http.StatusBadRequest, ""},
 		{"invalid username pattern", "asd123", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusBadRequest, ""},
@@ -173,6 +175,13 @@ func TestHelloPutIntegration(t *testing.T) {
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			if tc.expectedResponseBody != "" {
 				assert.Equal(t, tc.expectedResponseBody, w.Body.String())
+			}
+
+			if tc.expectedStatus == http.StatusNoContent {
+				count := 0
+				err := testDB.QueryRow(`SELECT COUNT(*) from users WHERE username = ? AND date_of_birth = ?`, tc.username, pastDate).Scan(&count)
+				assert.NoErrorf(t, err, "Failed to query user %s: %v", tc.username, err)
+				assert.Equal(t, 1, count)
 			}
 		})
 	}
@@ -212,9 +221,7 @@ func initializeTestContainerDb(ctx context.Context, logger *log.Logger) (*mysqlC
 			},
 			Networks:       []string{"testnet"},
 			NetworkAliases: map[string][]string{"testnet": []string{"mysql"}},
-			Files:          []testcontainers.ContainerFile{
-				//				{HostFilePath: "../../local-env/dev-my.cnf", ContainerFilePath: "/docker-entrypoint-initdb.d/my.cnf", FileMode: 0644},
-			},
+			Files:          []testcontainers.ContainerFile{},
 			WaitingFor: wait.ForAll(
 				wait.ForLog("/usr/sbin/mysqld: ready for connections").WithPollInterval(20*time.Second),
 				wait.ForListeningPort("3306/tcp"),

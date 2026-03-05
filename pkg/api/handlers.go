@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Server struct {
@@ -64,7 +65,11 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		user := DateOfBirth{Username: username}
 		birthdayMessage, err := s.HelloServer.Get(&user)
 		if err != nil {
-			return
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		}
+		if birthdayMessage == nil && err == nil {
+			log.WithFields(log.Fields{"username": username}).Info("username not found")
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

@@ -16,10 +16,20 @@ DB_NAME=""
 DB_PORT=3306
 SERVER_PORT=8089
 ```
-DB_HOST="localhost" DB_USERNAME="root"
-DB_PASSWORD="passwd1" DB_NAME="littlecluster" 
-DB_PORT=3306
-SERVER_PORT=8089
+
+## Github Container Registry Credentials
+To allow the cluster to download the container you'll need a Github Token from your personal account. 
+
+Go to:
+- `github.com -> settings -> developer settings -> personal access tokens -> tokens (classic)`
+- Create a new token.Select a duration and grant the permissions: `read:packages`
+- Click on `Generate`
+- Copy the token `ghp_...` to a safe place.
+- Login into ghcr.io: `docker login ghcr.io`. it will ask for your github username and the password (the token created).
+- make sure your kubernetes context points to the application namespace
+- If you are using a Mac, run the helper provided `bash extract-docker-ghcr.io-credentials.sh`
+
+Alternatively, [follow instructions here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to create credentials for a private registry. Use `docker login ghcr.io` instead of plain `docker login`
 
 # Tests
 

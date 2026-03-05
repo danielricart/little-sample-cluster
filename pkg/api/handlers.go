@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,9 @@ import (
 )
 
 type Server struct {
-	Logger *log.Logger
+	Logger      *log.Logger
+	Database    *sql.DB
+	HelloServer *HelloServer
 }
 
 var (
@@ -59,7 +62,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		user := DateOfBirth{Username: username}
-		birthdayMessage, err := user.Get()
+		birthdayMessage, err := s.HelloServer.Get(&user)
 		if err != nil {
 			return
 		}
@@ -92,7 +95,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		dateOfBirth.Username = username
 
-		err = dateOfBirth.Put()
+		err = s.HelloServer.Put(&dateOfBirth)
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to put date of birth: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)

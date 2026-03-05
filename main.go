@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"little-sample-cluster/pkg/api"
+	"little-sample-cluster/pkg/db"
 	"net/http"
 	"os"
 )
@@ -20,10 +21,29 @@ func main() {
 		logger.SetLevel(log.TraceLevel)
 	}
 
+	// Load database configuration
+	config := db.LoadConfigFromEnv()
+	logger.WithFields(log.Fields{
+		"host":     config.Host,
+		"database": config.Database,
+		"port":     config.Port,
+	}).Info("Database configuration loaded")
+
+	// Connect to database
+	database, err := config.Connect()
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to connect to database")
+	}
+	defer database.Close()
+
+	logger.Info("Database connection established")
+
 	logger.Info("Starting Hello Birthday...")
 
 	server := api.Server{
-		Logger: logger,
+		Logger:      logger,
+		Database:    database,
+		HelloServer: api.NewHelloServer(database, logger),
 	}
 
 	http.HandleFunc("/health", server.HealthHandler)

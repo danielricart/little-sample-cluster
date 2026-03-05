@@ -55,9 +55,10 @@ func main() {
 		logger.WithError(err).Fatal("Failed to create table")
 	}
 
-	http.HandleFunc("/health", server.HealthHandler)
-	http.HandleFunc("/hello", server.HelloHandler)
-	http.Handle("/metrics", *promHandler)
+	http.HandleFunc("GET /health", server.HealthHandler)
+	http.HandleFunc("GET /hello/{username}{$}", server.HelloGetHandler)
+	http.HandleFunc("PUT /hello/{username}{$}", server.HelloPutHandler)
+	http.Handle("GET /metrics", *promHandler)
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8089"

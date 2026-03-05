@@ -124,7 +124,7 @@ func TestHelloGetIntegration(t *testing.T) {
 			req := httptest.NewRequest(tc.method, fmt.Sprintf("/hello/%s", tc.username), nil)
 			w := httptest.NewRecorder()
 
-			server.HelloHandler(w, req)
+			server.HelloGetHandler(w, req)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			if tc.expectedBody != "" {
@@ -171,7 +171,7 @@ func TestHelloPutIntegration(t *testing.T) {
 			req := httptest.NewRequest(tc.method, fmt.Sprintf("/hello/%s", tc.username), strings.NewReader(tc.requestBody))
 			w := httptest.NewRecorder()
 
-			server.HelloHandler(w, req)
+			server.HelloPutHandler(w, req)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			if tc.expectedResponseBody != "" {

@@ -38,6 +38,22 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DB_HOST
+              value: {{ .Values.little_sample_cluster.db_host }}
+            - name: DB_USERNAME
+              value: {{ .Values.mysql.global.mysql.auth.username }}
+            - name: DB_NAME
+              value: {{ .Values.mysql.global.mysql.auth.database }}
+            - name: DB_PASSWORD
+              {{- if .Values.mysql.global.mysql.auth.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.global.mysql.auth.existingSecret }}
+                  key: mysql-password
+              {{- else }}
+              value: {{ .Values.mysql.global.mysql.auth.password | quote }}
+              {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

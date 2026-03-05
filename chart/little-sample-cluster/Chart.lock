@@ -1,0 +1,6 @@
+dependencies:
+- name: mysql
+  repository: https://kubelauncher.github.io/charts
+  version: 0.2.10
+digest: sha256:a4b573133dbe315402f747379476079dd0196fb8e91e571559b05341311272bc
+generated: "2026-03-05T13:32:53.739813+01:00"

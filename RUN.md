@@ -31,6 +31,24 @@ Go to:
 
 Alternatively, [follow instructions here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to create credentials for a private registry. Use `docker login ghcr.io` instead of plain `docker login`
 
+
+## Helm dependencies
+If applying the chart manually, you need to resolve the dependencies. 
+from the project root, run:
+```
+helm dependency build chart/little-sample-cluster
+```
+
+
+## Too many files errors
+When running on a localhost development cluster, and any of the containers crash and log errors related to inotify, not enough file descriptors... this oculd be due to the local system ahving low file limits. 
+
+In macOS, follow: https://superuser.com/a/1679740
+
+Alternatively, could be because the Docker engine doesn't have neough file descriptors. Follow [this documentation page](https://docs.rancherdesktop.io/how-to-guides/increasing-open-file-limit/) to increase file descriptor for Rancher. 
+
+The error could be because of a combination of both.
+
 # Tests
 
 ## Prerequirements 
@@ -42,7 +60,7 @@ export DOCKER_HOST=unix://$HOME/.rd/docker.sock
 export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 ```
 
-A similar pacth applies for Colima. Use `.colima` instead of `.rd`
+A similar patch applies for Colima. Use `.colima` instead of `.rd`
 
 ## Run tests
 

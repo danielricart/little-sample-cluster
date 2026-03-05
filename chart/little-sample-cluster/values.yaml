@@ -2,6 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+little_sample_cluster:
+  db_host: little-cluster-mysql.kube-public.svc.cluster.local
+  db_user: littlecluster
+  db_name: users
+
 replicaCount: 1
 
 image:
@@ -96,3 +101,43 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+mysql:
+  image:
+    registry: docker.io
+    repository: mysql
+    tag: "8.4.8"
+    digest: ""
+    pullPolicy: IfNotPresent
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false
+  networkPolicy:
+    enabled: true
+    allowExternal: true
+  primary:
+    resources:
+      limits:
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  global:
+    mysql:
+      auth:
+        database: users
+        username: littlecluster
+        # rootPassword: ""       # set via --set or a values override, never committed
+        # password: ""           # set via --set or a values override, never committed
+        # replicationPassword: "" # set via --set or a values override, never committed
+        existingSecret: ""       # alternative: name of a pre-created K8s Secret
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: my-mysql-secret
+#   namespace: <your-namespace>
+# type: Opaque
+# stringData:
+#   mysql-root-password: SomeRootPassword
+#   mysql-password: SomeAppPassword

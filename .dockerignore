@@ -1,0 +1,6 @@
+# ignore all but go files when building the container
+# docker context does not need the chart, md files or anything that could bloat the context.
+*
+!**/*.go
+!go.mod
+!go.sum

@@ -1,0 +1,36 @@
+name: Helm Lint
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'chart/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'chart/**'
+
+jobs:
+  helm-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: add repo
+        run: helm repo add kubelauncher https://kubelauncher.github.io/charts
+
+      - name: Install Helm dependencies
+        run: helm dependency build chart/little-sample-cluster
+
+      - name: Helm lint
+        run: helm lint chart/little-sample-cluster
+
+      - name: Helm template
+        run: helm template little-sample-cluster chart/little-sample-cluster

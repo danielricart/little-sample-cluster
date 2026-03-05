@@ -1,5 +1,6 @@
 FROM golang:1.25.4-alpine AS builder
 
+
 WORKDIR /app
 
 # Copy go mod and sum files

@@ -3,9 +3,10 @@
 # Declare variables to be passed into your templates.
 
 little_sample_cluster:
-  db_host: little-cluster-mysql.kube-public.svc.cluster.local
-  db_user: littlecluster
-  db_name: users
+  db:
+    host: little-cluster-mysql.kube-public.svc.cluster.local
+    port: 3306
+    # username, password, database_name are provisioned in section .mysql
   podMonitor:
     enabled: false
     interval: 30s

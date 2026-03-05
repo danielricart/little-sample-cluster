@@ -25,7 +25,7 @@ var (
 )
 
 func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("health handler called")
+	s.Logger.Debug("health handler called")
 
 	if r.Method != http.MethodGet {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -35,12 +35,12 @@ func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte("OK"))
 	if err != nil {
-		log.Error(fmt.Errorf("failed to write health response: %w", err))
+		s.Logger.Error(fmt.Errorf("failed to write health response: %w", err))
 	}
 }
 
 func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("hello handler called")
+	s.Logger.Debug("hello handler called")
 
 	//Failing early is safer. it duplicates the switch statement but we don't
 	//know what can come with non-syupported methods in terms of path, body, and formats.
@@ -58,7 +58,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 
 	username := strings.Split(r.URL.Path, "/")[2]
 	if !IsUsernameValid(username) {
-		log.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
+		s.Logger.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -69,13 +69,17 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		birthdayMessage, err := s.HelloServer.Get(&user)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
 			return
 		}
 		if birthdayMessage == nil && err == nil {
-			log.WithFields(log.Fields{"username": username}).Info("username not found")
+			s.Logger.WithFields(log.Fields{"username": username}).Info("username not found")
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -83,9 +87,14 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		respBody, err := json.Marshal(birthdayMessage)
 		_, err = w.Write([]byte(respBody))
 		if err != nil {
-			log.WithFields(log.Fields{"username": username}).Error(fmt.Errorf("failed to write response: %w", err))
+			s.Logger.WithFields(log.Fields{"username": username}).Error(fmt.Errorf("failed to write response: %w", err))
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
+			if s.Metrics != nil {
+				s.Metrics.ValidQueries.Add(1.0)
+			}
 			return
 		}
 
@@ -95,7 +104,9 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to read body: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
 			return
 		}
 		defer func(Body io.ReadCloser) {
@@ -105,16 +116,20 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}(r.Body)
 		if strings.Compare(string(bodyBytes), username) == 0 {
-			log.WithFields(log.Fields{"username": username}).Error("body is empty")
+			s.Logger.WithFields(log.Fields{"username": username}).Error("body is empty")
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
 			return
 		}
 		err = json.Unmarshal(bodyBytes, &dateOfBirth)
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to unmarshal body: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
 			return
 		}
 		dateOfBirth.Username = username
@@ -123,10 +138,14 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to put date of birth: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			s.Metrics.InvalidQueries.Add(1.0)
+			if s.Metrics != nil {
+				s.Metrics.InvalidQueries.Add(1.0)
+			}
 			return
 		}
-		s.Metrics.ValidQueries.Add(1.0)
+		if s.Metrics != nil {
+			s.Metrics.ValidQueries.Add(1.0)
+		}
 		w.WriteHeader(http.StatusNoContent)
 
 	}

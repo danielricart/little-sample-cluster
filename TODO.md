@@ -30,17 +30,19 @@ to speed up http method filtering.
   - YYYY-MM-DD must be a date before today's date.
   - response content: { “dateOfBrith”: “YYYY-MM-DD” }
   - response: 200 OK
+  - if not found, response 404.
 - expose PUT /hello/<username> { “dateOfBrith”: “YYYY-MM-DD” }
   - Save or updates a given username and date of birth in a database
   - response 204 No Content
+- - pending store and fetch from DB. some tests fail because of this
+- DB respository for a simple struct with username and dateOfBirth
+- DB client
+- DB settings as env
+
 
 ## TODO
 
 ### application
-- pending store and fetch from DB. some tests fail because of this
-- DB respository for a simple struct with username and dateOfBirth
-- DB client
-- DB settings as env
 
 - expose prometheus metrics. total for inserted Date of birth, histogram with 12 buckets
 - 

@@ -58,6 +58,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if !IsUsernameValid(username) {
 		log.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
 	}
 
 	switch r.Method {
@@ -66,10 +67,12 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		birthdayMessage, err := s.HelloServer.Get(&user)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
 		}
 		if birthdayMessage == nil && err == nil {
 			log.WithFields(log.Fields{"username": username}).Info("username not found")
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -78,6 +81,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.WithFields(log.Fields{"username": username}).Error(fmt.Errorf("failed to write response: %w", err))
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 	case http.MethodPut:
@@ -86,6 +90,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to read body: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
 		}
 		defer func(Body io.ReadCloser) {
 			err := Body.Close()
@@ -93,10 +98,16 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 
 			}
 		}(r.Body)
+		if strings.Compare(string(bodyBytes), username) == 0 {
+			log.WithFields(log.Fields{"username": username}).Error("body is empty")
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 		err = json.Unmarshal(bodyBytes, &dateOfBirth)
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to unmarshal body: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
 		}
 		dateOfBirth.Username = username
 
@@ -104,6 +115,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to put date of birth: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
 		}
 		w.WriteHeader(http.StatusNoContent)
 

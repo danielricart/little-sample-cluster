@@ -16,6 +16,7 @@ type User struct {
 type UserRepository interface {
 	GetBirthDateByUsername(username string) (*time.Time, error)
 	InsertOrUpdateUsernameAndBirthDate(username string, birthDate time.Time) error
+	CreateTableIfNotExists() error
 }
 
 type UserRepositoryImpl struct {
@@ -51,6 +52,22 @@ func (u *UserRepositoryImpl) InsertOrUpdateUsernameAndBirthDate(username string,
 	_, err := u.db.Exec(query, username, birthDate)
 	if err != nil {
 		u.logger.Debug(err)
+		return err
+	}
+	return nil
+}
+
+func (u *UserRepositoryImpl) CreateTableIfNotExists() error {
+	query := `
+create table if not exists users
+(
+    username    varchar(200) not null
+        primary key,
+    date_of_birth DATE         not null
+);
+`
+	_, err := u.db.Exec(query)
+	if err != nil {
 		return err
 	}
 	return nil

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"little-sample-cluster/pkg/metrics"
 	"net/http"
 	"regexp"
 	"strings"
@@ -16,6 +17,7 @@ type Server struct {
 	Logger      *log.Logger
 	Database    *sql.DB
 	HelloServer *HelloServer
+	Metrics     *metrics.Metrics
 }
 
 var (
@@ -67,11 +69,13 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		birthdayMessage, err := s.HelloServer.Get(&user)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
 		if birthdayMessage == nil && err == nil {
 			log.WithFields(log.Fields{"username": username}).Info("username not found")
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -81,6 +85,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.WithFields(log.Fields{"username": username}).Error(fmt.Errorf("failed to write response: %w", err))
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
 
@@ -90,6 +95,7 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to read body: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
 		defer func(Body io.ReadCloser) {
@@ -101,12 +107,14 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if strings.Compare(string(bodyBytes), username) == 0 {
 			log.WithFields(log.Fields{"username": username}).Error("body is empty")
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
 		err = json.Unmarshal(bodyBytes, &dateOfBirth)
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to unmarshal body: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
 		dateOfBirth.Username = username
@@ -115,8 +123,10 @@ func (s *Server) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.Logger.Error(fmt.Errorf("failed to put date of birth: %w", err))
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			s.Metrics.InvalidQueries.Add(1.0)
 			return
 		}
+		s.Metrics.ValidQueries.Add(1.0)
 		w.WriteHeader(http.StatusNoContent)
 
 	}

@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"little-sample-cluster/pkg/api"
 	"little-sample-cluster/pkg/db"
+	"little-sample-cluster/pkg/metrics"
 	"net/http"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -39,16 +41,18 @@ func main() {
 	logger.Info("Database connection established")
 
 	logger.Info("Starting Hello Birthday...")
+	promMetrics, promHandler := metrics.NewMetrics(logger)
 
 	server := api.Server{
 		Logger:      logger,
 		Database:    database,
 		HelloServer: api.NewHelloServer(database, logger),
+		Metrics:     promMetrics,
 	}
 
 	http.HandleFunc("/health", server.HealthHandler)
 	http.HandleFunc("/hello", server.HelloHandler)
-
+	http.Handle("/metrics", *promHandler)
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8089"

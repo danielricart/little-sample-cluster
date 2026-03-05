@@ -9,13 +9,17 @@ The server port is defined as an environment variable.
 Make sure the following environment variables exists. Some will take a default if specified. 
 
 ```
-"DB_HOST="localhost"
+DB_HOST="localhost"
 DB_USERNAME="root"
 DB_PASSWORD=""
 DB_NAME=""
 DB_PORT=3306
 SERVER_PORT=8089
 ```
+DB_HOST="localhost" DB_USERNAME="root"
+DB_PASSWORD="passwd1" DB_NAME="littlecluster" 
+DB_PORT=3306
+SERVER_PORT=8089
 
 # Tests
 

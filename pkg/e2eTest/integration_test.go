@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"little-sample-cluster/pkg/api"
+	"little-sample-cluster/pkg/metrics"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -187,16 +188,33 @@ func TestHelloPutIntegration(t *testing.T) {
 	}
 }
 
+func TestMetricsIntegration(t *testing.T) {
+	server := initializeServer()
+	_, metrHandler := metrics.NewMetrics(server.Logger)
+	t.Run("check metrics are exposed", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/metrics", strings.NewReader(""))
+		w := httptest.NewRecorder()
+		(*metrHandler).ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+		body := w.Body.String()
+		assert.Contains(t, body, "# HELP birthday_invalid_total")
+		assert.Contains(t, body, "# HELP birthday_registered_valid_total")
+		assert.Contains(t, body, `# HELP go_info`)
+	})
+}
+
 func initializeServer() api.Server {
 	logger := log.New()
 	logger.SetFormatter(&log.JSONFormatter{})
 	logger.SetLevel(log.DebugLevel)
 	logger.SetReportCaller(true)
 
+	metricsObj, _ := metrics.NewMetrics(logger)
 	server := api.Server{
 		Logger:      logger,
 		Database:    testDB,
 		HelloServer: api.NewHelloServer(testDB, logger),
+		Metrics:     metricsObj,
 	}
 	return server
 }

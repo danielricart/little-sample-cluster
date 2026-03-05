@@ -1,6 +1,9 @@
 # little-sample-cluster
 Litle Application with a fullly-fledged deployment and cluster.
 
+NOTE: 
+Originally, the payload for put had a typo and it was written as `dateOfBrith`(notice the `r` <> `i`). This has been fixed in the implementation. 
+
 ## Application
 This is a simple application that exposes the following HTTP based APIs:
 
@@ -8,7 +11,7 @@ Description: Save/updates a given user name and date of birth in a database.
 
 Request: 
 ```
-PUT /hello/<username> { “dateOfBrith”: “YYYY-MM-DD” }
+PUT /hello/<username> { “dateOfBirth”: “YYYY-MM-DD” }
 
 Response: 204 No Content
 ```

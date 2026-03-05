@@ -24,8 +24,8 @@ jobs:
         uses: azure/setup-helm@v4
 
       - name: add repo
-        run: helm repo add https://kubelauncher.github.io/charts
-        
+        run: helm repo add kubelauncher https://kubelauncher.github.io/charts
+
       - name: Install Helm dependencies
         run: helm dependency build chart/little-sample-cluster
 

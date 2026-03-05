@@ -56,8 +56,8 @@ func main() {
 	}
 
 	http.HandleFunc("GET /health", server.HealthHandler)
-	http.HandleFunc("GET /hello/{username}{$}", server.HelloGetHandler)
-	http.HandleFunc("PUT /hello/{username}{$}", server.HelloPutHandler)
+	http.HandleFunc("GET /hello/{username}", server.HelloGetHandler)
+	http.HandleFunc("PUT /hello/{username}", server.HelloPutHandler)
 	http.Handle("GET /metrics", *promHandler)
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

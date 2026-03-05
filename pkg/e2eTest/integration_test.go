@@ -63,6 +63,7 @@ func TestMain(m *testing.M) {
 
 func TestHealthIntegration(t *testing.T) {
 	server := initializeServer()
+	mux := newIntegrationMux(server)
 
 	cases := []struct {
 		name           string
@@ -79,7 +80,7 @@ func TestHealthIntegration(t *testing.T) {
 			req := httptest.NewRequest(tc.method, "/health", nil)
 			w := httptest.NewRecorder()
 
-			server.HealthHandler(w, req)
+			mux.ServeHTTP(w, req)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			if tc.expectedBody != "" {
@@ -91,6 +92,7 @@ func TestHealthIntegration(t *testing.T) {
 
 func TestHelloGetIntegration(t *testing.T) {
 	server := initializeServer()
+	mux := newIntegrationMux(server)
 	today := time.Now().AddDate(-1, 0, 0).Format("2006-01-02")
 	inThreeDays := time.Now().AddDate(-1, 0, +3).Format("2006-01-02")
 	cases := []struct {
@@ -124,7 +126,7 @@ func TestHelloGetIntegration(t *testing.T) {
 			req := httptest.NewRequest(tc.method, fmt.Sprintf("/hello/%s", tc.username), nil)
 			w := httptest.NewRecorder()
 
-			server.HelloGetHandler(w, req)
+			mux.ServeHTTP(w, req)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			if tc.expectedBody != "" {
@@ -146,6 +148,7 @@ func TestHelloGetIntegration(t *testing.T) {
 
 func TestHelloPutIntegration(t *testing.T) {
 	server := initializeServer()
+	mux := newIntegrationMux(server)
 
 	pastDate := time.Now().AddDate(-1, 0, -1).Format("2006-01-02")
 	futureDate := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
@@ -171,7 +174,7 @@ func TestHelloPutIntegration(t *testing.T) {
 			req := httptest.NewRequest(tc.method, fmt.Sprintf("/hello/%s", tc.username), strings.NewReader(tc.requestBody))
 			w := httptest.NewRecorder()
 
-			server.HelloPutHandler(w, req)
+			mux.ServeHTTP(w, req)
 
 			assert.Equal(t, tc.expectedStatus, w.Code)
 			if tc.expectedResponseBody != "" {
@@ -190,11 +193,11 @@ func TestHelloPutIntegration(t *testing.T) {
 
 func TestMetricsIntegration(t *testing.T) {
 	server := initializeServer()
-	_, metrHandler := metrics.NewMetrics(server.Logger)
+	mux := newIntegrationMux(server)
 	t.Run("check metrics are exposed", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/metrics", strings.NewReader(""))
 		w := httptest.NewRecorder()
-		(*metrHandler).ServeHTTP(w, req)
+		mux.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
 		body := w.Body.String()
 		assert.Contains(t, body, "# HELP birthday_invalid_total")
@@ -346,4 +349,14 @@ func connectToDb(connStrDsn string) error {
 		return fmt.Errorf("failed to ping database: %w", err)
 	}
 	return nil
+}
+
+func newIntegrationMux(server api.Server) *http.ServeMux {
+	mux := http.NewServeMux()
+	_, metricsHandler := metrics.NewMetrics(server.Logger)
+	mux.HandleFunc("GET /health", server.HealthHandler)
+	mux.HandleFunc("GET /hello/{username}", server.HelloGetHandler)
+	mux.HandleFunc("PUT /hello/{username}", server.HelloPutHandler)
+	mux.Handle("GET /metrics", *metricsHandler)
+	return mux
 }

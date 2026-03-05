@@ -56,7 +56,7 @@ func (s *Server) HelloGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := usernameFromRequest(r)
+	username := r.PathValue("username")
 	if !IsUsernameValid(username) {
 		s.Logger.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -113,7 +113,7 @@ func (s *Server) HelloPutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := usernameFromRequest(r)
+	username := r.PathValue("username")
 	if !IsUsernameValid(username) {
 		s.Logger.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -168,23 +168,4 @@ func (s *Server) HelloPutHandler(w http.ResponseWriter, r *http.Request) {
 		s.Metrics.ValidQueries.Add(1.0)
 	}
 	w.WriteHeader(http.StatusNoContent)
-}
-
-// usernameFromRequest supports mux-routed requests and direct handler calls used in tests.
-func usernameFromRequest(r *http.Request) string {
-	if username := r.PathValue("username"); username != "" {
-		return username
-	}
-
-	const helloPrefix = "/hello/"
-	if !strings.HasPrefix(r.URL.Path, helloPrefix) {
-		return ""
-	}
-
-	username := strings.TrimPrefix(r.URL.Path, helloPrefix)
-	if strings.Contains(username, "/") {
-		return ""
-	}
-
-	return username
 }

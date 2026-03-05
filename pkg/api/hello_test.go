@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -60,25 +59,4 @@ func TestDaysTilBirth(t *testing.T) {
 			assert.Equal(t, tc.expected, d.daysTilBirth())
 		})
 	}
-}
-
-func TestUsernameFromRequest(t *testing.T) {
-	t.Run("reads username from path variables", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/hello/from-path-value", nil)
-		req.SetPathValue("username", "from-path-value")
-
-		assert.Equal(t, "from-path-value", usernameFromRequest(req))
-	})
-
-	t.Run("falls back to URL path when not mux-routed", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/hello/from-url", nil)
-
-		assert.Equal(t, "from-url", usernameFromRequest(req))
-	})
-
-	t.Run("rejects nested paths", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/hello/user/extra", nil)
-
-		assert.Equal(t, "", usernameFromRequest(req))
-	})
 }

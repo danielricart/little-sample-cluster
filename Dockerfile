@@ -1,4 +1,4 @@
-FROM golang:1.25.1-alpine AS builder
+FROM golang:1.25.4-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -ldflags="-s -w" -o little-sample-cluster .
 
 # Start a new stage with minimal image
-FROM alpine:latest
+FROM scratch
 LABEL org.opencontainers.image.source=https://github.com/danielricart/little-sample-cluster
 WORKDIR /root/
 

@@ -28,7 +28,7 @@ func NewUserRepository(db *sql.DB, logger *log.Logger) *UserRepositoryImpl {
 func (u *UserRepositoryImpl) GetBirthDateByUsername(username string) (*time.Time, error) {
 	// get the most recent user and limit to 1 result.
 	//given that there are constraints for usernames being unique, this will return always 1 or 0.
-	query := "SELECT username, birth_date FROM users WHERE username = ? order by id desc limit 1"
+	query := "SELECT username, date_of_birth FROM users WHERE username = ? limit 1"
 
 	user := &User{}
 

@@ -212,7 +212,7 @@ func initializeTestContainerDb(ctx context.Context, logger *log.Logger) (*mysqlC
 			},
 			Networks:       []string{"testnet"},
 			NetworkAliases: map[string][]string{"testnet": []string{"mysql"}},
-			Files: []testcontainers.ContainerFile{
+			Files:          []testcontainers.ContainerFile{
 				//				{HostFilePath: "../../local-env/dev-my.cnf", ContainerFilePath: "/docker-entrypoint-initdb.d/my.cnf", FileMode: 0644},
 			},
 			WaitingFor: wait.ForAll(

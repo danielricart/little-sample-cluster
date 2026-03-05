@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"little-sample-cluster/pkg/db"
 	"math"
 	"regexp"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -77,8 +78,12 @@ func (s *HelloServer) Get(d *DateOfBirth) (*BirthdayMessage, error) {
 	if d.Username == "" {
 		return nil, errors.New("username is empty")
 	}
-	// TODO: Get from database
-	d.DateOfBirth = "2023-03-04"
+
+	birthDate, err := s.UsernameRepository.GetBirthDateByUsername(d.Username)
+	if err != nil {
+		return nil, err
+	}
+	d.DateOfBirth = birthDate.Format("2006-01-02")
 	d.TilBirth = d.daysTilBirth()
 
 	if d.TilBirth == 0 {

@@ -6,6 +6,10 @@ little_sample_cluster:
   db_host: little-cluster-mysql.kube-public.svc.cluster.local
   db_user: littlecluster
   db_name: users
+  podMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
 
 replicaCount: 1
 
@@ -114,7 +118,7 @@ mysql:
     serviceMonitor:
       enabled: false
   networkPolicy:
-    enabled: true
+    enabled: false
     allowExternal: true
   primary:
     resources:

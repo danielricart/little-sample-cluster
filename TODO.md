@@ -38,14 +38,13 @@ to speed up http method filtering.
 - DB respository for a simple struct with username and dateOfBirth
 - DB client
 - DB settings as env
-
+- expose prometheus metrics. total for inserted Date of birth, and total for invalid requests
+-
 
 ## TODO
 
 ### application
 
-- expose prometheus metrics. total for inserted Date of birth, histogram with 12 buckets
-- 
 - helm chart for application
 
 ### infrastructure

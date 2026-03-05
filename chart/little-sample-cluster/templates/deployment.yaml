@@ -40,7 +40,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: DB_HOST
-              value: {{ .Values.little_sample_cluster.db_host }}
+              value: {{ .Values.little_sample_cluster.db.host }}
+            - name: DB_PORT
+              value: {{ .Values.little_sample_cluster.db.port | quote }}
             - name: DB_USERNAME
               value: {{ .Values.mysql.global.mysql.auth.username }}
             - name: DB_NAME

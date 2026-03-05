@@ -50,6 +50,11 @@ func main() {
 		Metrics:     promMetrics,
 	}
 
+	err = server.HelloServer.UsernameRepository.CreateTableIfNotExists()
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to create table")
+	}
+
 	http.HandleFunc("/health", server.HealthHandler)
 	http.HandleFunc("/hello", server.HelloHandler)
 	http.Handle("/metrics", *promHandler)

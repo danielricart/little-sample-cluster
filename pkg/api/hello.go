@@ -1,12 +1,15 @@
 package api
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
+	"little-sample-cluster/pkg/db"
 	"math"
 	"regexp"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -14,6 +17,12 @@ var (
 	NotBirthdayTemplate = "Hello, %s! Your birthday is in %d day(s)"
 	BirthdayTemplate    = "Hello, %s! Happy birthday!"
 )
+
+type HelloServer struct {
+	Database           *sql.DB
+	Logger             *log.Logger
+	UsernameRepository db.UserRepository
+}
 
 type DateOfBirth struct {
 	Username    string `omitempty,json:"username"`
@@ -29,6 +38,14 @@ func IsUsernameValid(username string) bool {
 	return UserRegex.MatchString(username)
 }
 
+func NewHelloServer(database *sql.DB, logger *log.Logger) *HelloServer {
+	return &HelloServer{
+		Database:           database,
+		Logger:             logger,
+		UsernameRepository: db.NewUserRepository(database, logger),
+	}
+}
+
 // daysTilBirth computes the days that are between today and dateOfBirth of the instance.
 // returns 0 if it's today. the amount of days, otherwise.
 func (d *DateOfBirth) daysTilBirth() int {
@@ -42,7 +59,6 @@ func (d *DateOfBirth) daysTilBirth() int {
 	date := time.Date(todayYear, dateMonth, dateDay, 0, 0, 0, 0, time.UTC)
 
 	difference := today.Sub(date)
-	log.Errorf("difference: %v", difference)
 	result := 0.0
 
 	if dateMonth == todayMonth && dateDay == todayDay {
@@ -58,12 +74,19 @@ func (d *DateOfBirth) daysTilBirth() int {
 
 }
 
-func (d *DateOfBirth) Get() (*BirthdayMessage, error) {
+func (s *HelloServer) Get(d *DateOfBirth) (*BirthdayMessage, error) {
 	if d.Username == "" {
 		return nil, errors.New("username is empty")
 	}
-	// TODO: Get from database
-	d.DateOfBirth = "2023-03-04"
+
+	birthDate, err := s.UsernameRepository.GetBirthDateByUsername(d.Username)
+	if err != nil {
+		return nil, err
+	}
+	if birthDate == nil {
+		return nil, nil
+	}
+	d.DateOfBirth = birthDate.Format("2006-01-02")
 	d.TilBirth = d.daysTilBirth()
 
 	if d.TilBirth == 0 {
@@ -73,15 +96,23 @@ func (d *DateOfBirth) Get() (*BirthdayMessage, error) {
 	}
 }
 
-func (d *DateOfBirth) Put() error {
+func (s *HelloServer) Put(d *DateOfBirth) error {
 	if d.DateOfBirth > time.Now().Format("2006-01-02") {
 		return fmt.Errorf("date of birth is set in the future")
 	}
 
-	if IsUsernameValid(d.Username) {
+	if !IsUsernameValid(d.Username) {
 		return fmt.Errorf("username contains invalid characters or is empty")
 	}
+	dob, _ := time.Parse("2006-01-02", d.DateOfBirth)
 
-	log.Error("Not implemented")
-	return errors.New("Not implemented")
+	err := s.UsernameRepository.InsertOrUpdateUsernameAndBirthDate(d.Username, dob)
+	if err != nil {
+		s.Logger.WithFields(log.Fields{
+			"username": d.Username,
+			"date":     d.DateOfBirth,
+		}).Error(fmt.Errorf("error inserting or updating username: %w", err))
+		return fmt.Errorf("error inserting or updating username: %w", err)
+	}
+	return nil
 }

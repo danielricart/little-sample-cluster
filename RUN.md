@@ -36,6 +36,7 @@ Alternatively, [follow instructions here](https://kubernetes.io/docs/tasks/confi
 If applying the chart manually, you need to resolve the dependencies. 
 from the project root, run:
 ```
+helm repo add kubelauncher https://kubelauncher.github.io/charts
 helm dependency build chart/little-sample-cluster
 ```
 
@@ -45,7 +46,7 @@ When running on a localhost development cluster, and any of the containers crash
 
 In macOS, follow: https://superuser.com/a/1679740
 
-Alternatively, could be because the Docker engine doesn't have neough file descriptors. Follow [this documentation page](https://docs.rancherdesktop.io/how-to-guides/increasing-open-file-limit/) to increase file descriptor for Rancher. 
+Alternatively, could be because the Docker engine doesn't have enough file descriptors. Follow [this documentation page](https://docs.rancherdesktop.io/how-to-guides/increasing-open-file-limit/) to increase file descriptor for Rancher. 
 
 The error could be because of a combination of both.
 

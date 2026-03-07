@@ -15,11 +15,12 @@ self-made decisions:
 ## DONE
 ### AI Usage
 to speed up boilerplate for e2e tests and multi-case tests.
-to speed up http method filtering. 
+to speed up http method filtering. some mass refactoring on tests and metaresearch about some issues i found. 
 
 ### meta
 - build action for GHA on merge-to-main and PR to Main
 - also run tests on GHA
+- push image on merge to main and on tag. 
 
 ### application
 - logging in JSON output for easier parsing / indexing. It penalizes raw-reading logs
@@ -40,12 +41,12 @@ to speed up http method filtering.
 - DB settings as env
 - expose prometheus metrics. total for inserted Date of birth, and total for invalid requests
 -
+- helm chart for application
 
 ## TODO
 
 ### application
-
-- helm chart for application
+- VPA on helm if KEDA is added.
 
 ### infrastructure
 in a production ready env this would need:

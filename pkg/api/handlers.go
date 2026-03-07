@@ -67,17 +67,11 @@ func (s *Server) HelloGetHandler(w http.ResponseWriter, r *http.Request) {
 	birthdayMessage, err := s.HelloServer.Get(&user)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		if s.Metrics != nil {
-			s.Metrics.InvalidQueries.Add(1.0)
-		}
 		return
 	}
 	if birthdayMessage == nil && err == nil {
 		s.Logger.WithFields(log.Fields{"username": username}).Info("username not found")
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		if s.Metrics != nil {
-			s.Metrics.InvalidQueries.Add(1.0)
-		}
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -87,12 +81,6 @@ func (s *Server) HelloGetHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.Logger.WithFields(log.Fields{"username": username}).Error(fmt.Errorf("failed to write response: %w", err))
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		if s.Metrics != nil {
-			s.Metrics.InvalidQueries.Add(1.0)
-		}
-		if s.Metrics != nil {
-			s.Metrics.ValidQueries.Add(1.0)
-		}
 		return
 	}
 }
@@ -104,12 +92,18 @@ func (s *Server) HelloPutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		s.Logger.Error(fmt.Errorf("method %s not allowed", r.Method))
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		if s.Metrics != nil {
+			s.Metrics.InvalidQueries.Add(1.0)
+		}
 		return
 	}
 	// an additional path validation doesn't harm anyone.
 	if !HelloRegex.MatchString(r.URL.Path) {
 		s.Logger.Error(fmt.Errorf("invalid path: %s", r.URL.Path))
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		if s.Metrics != nil {
+			s.Metrics.InvalidQueries.Add(1.0)
+		}
 		return
 	}
 
@@ -117,6 +111,9 @@ func (s *Server) HelloPutHandler(w http.ResponseWriter, r *http.Request) {
 	if !IsUsernameValid(username) {
 		s.Logger.WithFields(log.Fields{"username": username}).Error("username contains invalid characters or is empty")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		if s.Metrics != nil {
+			s.Metrics.InvalidQueries.Add(1.0)
+		}
 		return
 	}
 

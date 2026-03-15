@@ -13,7 +13,7 @@ ECS is a higher level abstraction that reduces the operational complexity of mai
 
 EKS rises the abstraction compared to self-deploying your own Kubernetes infrastructure, but it is below ECS. It still offers some managed integrations, and it's somewhat coupled to foundational AWS Services. It offers optionality on what of the offered services you want AWS to manage for you or if you prefer to operate them yourself. The opreational load is higher than when using ECS, or fargate, but can still manageable once deployed and properly dimensioned. AWS will take care of dimensioning the API and ETCD servers according to the load detected and cluster size. There's still some dependencies on AWS Cloudwatch but limited to API logs and some infrastructure metrics. 
 
-Given the stability requirements and the operational work that comes with it, familiarity with the technology and operational flexibility that offers having access to a fully fledged K8S, I'll pick Amazon EKS as the runtime.
+Given the stability requirements and the operational work that comes with it, familiarity with the technology and operational flexibility that offers having access to a fully fledged K8S, I'll pick *Amazon EKS* as the runtime.
 
 It's true that, in a production environment with a single high traffic application exactly like this exercise, picking ECS would be the most optimal solution even accounting for the added reliance on many AWS services and the lack of industry-standard tooling.
 
@@ -22,6 +22,14 @@ In terms of worker nodes, we only need one or two nodegroup-managed instances fo
 For Karpenter to work it needs an instance where it's running before it takes over the instance provisioning activities. As we also need an instance to run a starter coreDNS, VPC CNI and kube-proxy, it generates little waste. we can use plain eks nodegroups for this.
 
 There are few other controllers we need to ensure the cluster can be bootstrapped and operated. Many of them can be provided by AWS at installation time and their lifecycle is managed using AWS API/Terraform Module/AWS Console. Only a small subset is convenient enough to be managed and the rest offer more freedom when they are self-managed instead. Moving from managed addons to self-provided deployments and viceversa is not an easy two-way door. 
+
+As a base image for each node in the cluster, we can use Amazon Linux 2023 or bottlerocket, depending on the tradeoffs for flexibility and surface we need to balance. 
+
+Bottlerocket is a container-optimized image that has mainly no packet management. It's design is read-only filesystem, and automated patching,, making it more secure at the extremes, making it more inconvenient but more fitted for high-securit environments. 
+
+Amazon Linux 2023 is a generic distribution maintaned by Amazon. It offers all the flexibility that a generic distribution offers in terms of access to filesystem, debugging tools, and package management while being frequently updated by AWS. 
+
+For this application we can use *Amazon Linux 2023*.
 
 ## AWS addons
 To fully work with EKS and interacting we need to ensure we have some operators that help interacting with cloud-provider-spacific resources. 
@@ -248,6 +256,16 @@ Traefik is also a renowned contender for this realm. Compared to Istio, Traefik 
 Istio is, OTOH, a CNCF graduated project. Which ensures a degree of transparency in their government and expectations comparable to other CNCF-backed projects (argocd, kubernetes, prometheus, ... )
 
 In a technical plane, online documentation and support for traefik, can, IMO, be improved significantly.
+
+## Public endpoints
+We need a public reachable endpoint that connects the requestors with the cluster. In AWS we can use different flavours of Load Balancers. Given that we don't need any of the speicifc HTTP routing capabilities of an Application Load Balancer (ALB) we will use *Network Load Balancers* when possible.  
+
+To automate the creation of the NLB we will need the *AWS Load Balancer Controller*. This controller will handle the creation of LBs when the Service object is of type `type: LoadBalancer`. Annotations will control the specific behaviour and details of it, like public exposure, subnets, security groups,s target type, cross-zone traffic, type, .... 
+
+All the required annotations can be specified in the helm chart for istio gateway at installation time. 
+
+The desired approach is to configure the ingress controller to use *one Load balancer per each ingress/gaetway class* . This will reduce the costs in Load Balancer objects and ensure better resource usage.  
+
 
 # TLS Certificates
 

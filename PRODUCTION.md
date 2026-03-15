@@ -45,7 +45,10 @@ To fully work with EKS and interacting we need to ensure we have some operators 
 
 ## Cost
 
-Assumptions: 1 AWS month = 730 hours.
+Assumptions: 
+- 1 AWS month = 730 hours. 
+- Ondemand pricing published on AWS Website 
+- eu-west-1 region
 
 The costs to consider here are:
 - EKS Control plane (0,10$/h)
@@ -57,7 +60,7 @@ Total costs of an empty cluster:
 - Nodegroup EC2: 294$
 - nodegroup EBS: 11$
 
-*Total: 378$/month* 
+*Total: 378$/month*  
 
 This cost does not consider network traffic of any kind, AWS Load Balancers, external databases, nor the cost of the additional EC2 instances that Karpenter will provision to schedule all the pods that don't fit in the bootstrapping instances. 
 
@@ -332,3 +335,42 @@ Technically speaking, is a specific ingress class with an Ingress object pointin
 Eventho the cluster for this application is mainly stateless and can be redeployed and being up to speed with not much hassle, having backups of the objects in there can be useful in case of selective recovery or auditing. 
 
 Velero is a fully fledged backup operator for kubernetes. It can back up Persistent Volumes and k8s objects following the defined rules and policies. Its state is stored in the actual backup storages.  
+
+## AWS VPC Endpoints
+Most of AWS Services can be accessed using public hostnames over internet, or creating VPC Endpoint services exposed in the VPC Subnets. 
+
+Using these private endpoints instead of the default public hostnames will reduce network costs as the internal traffic in AWS is cheaper than public internet traffic. 
+
+Especially for high-volume applications, services like ECR, S3, DynamoDB, cloudwatch can account for a significant percentage on the bill. 
+
+
+# Final costs
+EKS: 378$/month
+RDS: 122$/month
+LBs: 23$/month (for around 800 new TCP connections per second, or 100k TCP active sessions, or 1GB forwarded per hour). enough for sustained 55 requests per second (5KB/request). 
+
+Infrastructure cost: 523$/month + workers + network costs
+
+If all of our applications are ARM-built, we can use more efficient ARM instances. 
+
+We can guesstimate that we will need two m7g.xlarge or m8g instances (16gb, 4core) to fit the application at a baseline performance plus all the additional components. Each costs 132$, 146$/month.
+
+If we need to use x86-64 instances, we can use m6a.xlarge or m7i.xlarge at 140$, or 164$/month each.
+
+The minimum amount of workers will add at least 264-328$/month to the bill.
+
+Infrastructure total:
+Starting 787$/month for our little application running in a fully fledge production ready k8s. 
+
+This does not consider the costs of extra services like log and metrics storage.
+
+
+# reflection on the architecture proposed
+For a single application, running it in such production-grade highly scalable infrastructure is overkill until it reach a critical scaling point. This specific application could run on an autoscaling group with an ALB in front of it and cut all the overheads that the all the additional bootstrap nodes and EKS control plane impose. Also, the required worker instances could be selected smaller for a higher spread or larger to reduce the fleet size (cost is constant within a family).
+
+A potential architectural cutting point could be set at around 50 replicas in the basic autoscaling group or changes in the scope of the application or team organization. At some point the rollout time of a change using autoscaling groups will be too long to be practical in terms of both rolling forward and rolling back or halting the deployment. This would require additional improvements to the rollout process that will start to pay off for a different underlying architecture like the proposed one in this document.
+
+The relevance of having a kubernetes cluster to manage the application focuses more on the developer experience in terms of deployment management than in terms of pure cost and operational efficiency.
+
+An alternative simple and modern architecture based on containers could have been fargate or ECS, taking into consideration the AWS-specifics and vendor lock-in that imposes. 
+

@@ -2,7 +2,7 @@
 Litle Application with a fullly-fledged deployment and cluster.
 
 NOTE: 
-Originally, the payload for put had a typo and it was written as `dateOfBrith`(notice the `r` <> `i`). This has been fixed in the implementation. 
+Originally, the sample payload for `PUT` had a typo and it was written as `dateOfBrith`(notice the `r` <> `i`). This has been fixed in the implementation. 
 
 ## Application
 This is a simple application that exposes the following HTTP based APIs:

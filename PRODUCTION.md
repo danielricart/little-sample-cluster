@@ -105,9 +105,9 @@ In a Gitops model, the deployment is initiated when a change is applied in a mon
 
 Any can work, I'll pick ArgoCD. Eventho is fully CRD and CLI based, having a UI causes no harm and allows for checking at a quick glance what's the state of the applications.
 
-As ArgoCD is one of the first applications provisioned and properly configured from its helm chart, it can be used to provision ad maintain all the components required. even before having ingress, DNS management, TLS Certificates... 
+As ArgoCD is one of the first applications provisioned and properly configured from its helm chart, it can be used to provision ad maintain all the components required. even before having ingress, DNS management, TLS Certificates... its only requirements are having access to the github, helm and container repositories, proper RBAC policies to modify the cluster objects and access to the cluster API. Any other capability can be provided by itself once it starts processing argoproj's Application objects. 
 
-all the initial Argo applications objects will be provisioned using an app-of-apps argocd pattern. 
+all the initial Argo applications objects can be provisioned using an app-of-apps argocd pattern. 
 
 # application deployment 
 Our little application is delivered as a helm chart and a container stored in a container registry. There's an argocd application available in the `application` folder. 

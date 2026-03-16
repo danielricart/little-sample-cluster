@@ -78,3 +78,9 @@ brew install graphviz # sudo apt install graphviz
 pip3 install diagrams
 ```
 
+
+# AI Usage
+- to speed up boilerplate for github action creation, e2e tests and multi-case tests.
+- to speed up http method filtering. some mass refactoring on tests and metaresearch about some issues I've found. 
+- Architecture.py has been suggested by ClaudeCode based on the content of PRODUCTION.md. Then I edited manually to make it correct. 
+- demo/deploy.sh has been worked in collab with ClaudeCode.

@@ -1,0 +1,20 @@
+# ingress-nginx Helm values for kind.
+# Configures the controller as NodePort bound to the ports mapped in kind-cluster.yaml.
+# The nodeSelector + tolerations ensure the controller lands on the control-plane node,
+# which is the only node with the extraPortMappings (30080 → host:80, 30443 → host:443).
+controller:
+  nodeSelector:
+    ingress-ready: "true"
+    kubernetes.io/os: linux
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Equal
+      effect: NoSchedule
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30080
+      https: 30443
+  publishService:
+    enabled: false
+  hostNetwork: false

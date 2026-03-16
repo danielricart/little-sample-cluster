@@ -151,7 +151,6 @@ func TestHelloPutIntegration(t *testing.T) {
 	mux := newIntegrationMux(server)
 
 	pastDate := time.Now().AddDate(-1, 0, -1).Format("2006-01-02")
-	pastDate2 := time.Now().AddDate(-1, 0, -3).Format("2006-01-02")
 	futureDate := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
 	cases := []struct {
 		testName             string

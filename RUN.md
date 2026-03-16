@@ -1,6 +1,26 @@
-# Execution
+# Local kubernetes execution
 
-## Prerequirements
+## prerequirements
+
+- `kind` local cluster. [Check here how to install `kind`](https://kind.sigs.k8s.io/)
+- Github Container Registry credentials. Check [#github-container-registry-credentials] below for details.
+
+## Deploy in Kind
+
+run the deployment script: 
+```shell
+bash ./demo/deploy.sh
+```
+
+The script will ask for a password for the Database user, and your Github Container Registry credentials.
+
+The rest of the process is automated. It will provision a kind cluster called `little-sample-cluster` with one node and the application deployed. 
+
+A small description will tell how to access the application deployed.
+
+# Local Execution
+
+## Database
 
 The connection to the database is defined using environment variables. 
 
@@ -20,14 +40,17 @@ SERVER_PORT=8089
 ## Github Container Registry Credentials
 To allow the cluster to download the container you'll need a Github Token from your personal account. 
 
-Go to:
+To use the ones in your system, 
+- If you are using a Mac, run the helper provided `bash extract-docker-ghcr.io-credentials.sh`. the script will show the required credentials.
+
+
+To generate new ones, go to:
 - `github.com -> settings -> developer settings -> personal access tokens -> tokens (classic)`
 - Create a new token.Select a duration and grant the permissions: `read:packages`
 - Click on `Generate`
 - Copy the token `ghp_...` to a safe place.
 - Login into ghcr.io: `docker login ghcr.io`. it will ask for your github username and the password (the token created).
 - make sure your kubernetes context points to the application namespace
-- If you are using a Mac, run the helper provided `bash extract-docker-ghcr.io-credentials.sh`
 
 Alternatively, [follow instructions here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to create credentials for a private registry. Use `docker login ghcr.io` instead of plain `docker login`
 
@@ -36,6 +59,7 @@ Alternatively, [follow instructions here](https://kubernetes.io/docs/tasks/confi
 If applying the chart manually, you need to resolve the dependencies. 
 from the project root, run:
 ```
+helm repo add kubelauncher https://kubelauncher.github.io/charts
 helm dependency build chart/little-sample-cluster
 ```
 
@@ -45,7 +69,7 @@ When running on a localhost development cluster, and any of the containers crash
 
 In macOS, follow: https://superuser.com/a/1679740
 
-Alternatively, could be because the Docker engine doesn't have neough file descriptors. Follow [this documentation page](https://docs.rancherdesktop.io/how-to-guides/increasing-open-file-limit/) to increase file descriptor for Rancher. 
+Alternatively, could be because the Docker engine doesn't have enough file descriptors. Follow [this documentation page](https://docs.rancherdesktop.io/how-to-guides/increasing-open-file-limit/) to increase file descriptor for Rancher. 
 
 The error could be because of a combination of both.
 
@@ -61,6 +85,8 @@ export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
 ```
 
 A similar patch applies for Colima. Use `.colima` instead of `.rd`
+
+This issue is attempted to be addressed [in this PR](https://github.com/testcontainers/testcontainers-java/pull/9140) but it is still pending.
 
 ## Run tests
 

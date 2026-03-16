@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: little-sample-cluster
+  namespace: argocd
+spec:
+  destination:
+    namespace: little-sample-cluster
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: little-sample-cluster
+    repoURL: https://github.com/danielricart/little-sample-cluster.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

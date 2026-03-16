@@ -22,8 +22,6 @@ jq -n \
         auth: $a
       }
     }
-  }' | kubectl create secret generic regcred \
-       --type=kubernetes.io/dockerconfigjson \
-       --from-file=.dockerconfigjson=/dev/stdin
+  }'
 
-echo "Created secret regcred in current namespace and context"
+echo "These are the credentials presents in your system for GHCR (github container registry)"

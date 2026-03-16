@@ -1,0 +1,23 @@
+# Demo values override — safe to commit.
+# Secrets (mysql password, registry credentials) are NOT set here;
+# they are injected at deploy time via --set in deploy.sh.
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+mysql:
+  global:
+    mysql:
+      auth:
+        password: ""   # overridden at deploy time — do not set here
+
+registryCredentials:
+  ghcr.io:
+    username: ""  # overriden at deploy time. do not set.
+    password: ""  # overriden at deploy time. do not set.

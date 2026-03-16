@@ -23,11 +23,19 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-      {{- range . }}
-      - name: {{ . }}
+      {{- $pullSecrets := .Values.imagePullSecrets | default list }}
+      {{- range $registry := keys .Values.registryCredentials }}
+      {{- $pullSecrets = append $pullSecrets (dict "name" (printf "regcred-%s" ($registry | replace "." "-" | replace "/" "-"))) }}
       {{- end }}
+      {{- if $pullSecrets }}
+      imagePullSecrets:
+        {{- range $pullSecrets }}
+        {{- if kindIs "string" . }}
+        - name: {{ . }}
+        {{- else }}
+        - name: {{ .name }}
+        {{- end }}
+        {{- end }}
       {{- end }}
       serviceAccountName: {{ include "little-sample-cluster.serviceAccountName" . }}
       securityContext:

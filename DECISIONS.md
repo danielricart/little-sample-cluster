@@ -3,17 +3,17 @@ The application relies on a Database service. This service is provided in-cluste
 
 For a proper production setup this is probably not ideal, as the default MySQL settings won't make the cut under load. And the configuration of the dependency pollutes the values.yaml of the main application.
 
-For a proper setup, it's best that the DB service is already provided. Either by an independent application, or an external service. 
+For a proper setup, it's best that the DB service is already provided, either by an independent application, or an external service. Alternative option could be to use AWS Controller for Kubernetes and provision and RDS database object. More on this is discussed in [`PRODUCTION.md`](./PRODUCTION.md)
 
 # Data model
-The datamodel of the application is clearly a key-value, using the username as the unique key of the data pair. With no further details on the usage of the service or additional information, I didn't envision the need of any sort of unique autoincremental ID. 
+The datamodel of the application is clearly a key-value, using the username as the unique key of the data pair. With no further details on the usage of the service or additional information, I didn't envision the need of any sort of unique autoincremental ID for this usecase. Usernames are considerd as-is, respecting their capitalization. 
 
 ## Database engine
 
 I chose Mysql as i am familiar with it and I could craft a quick client in golang easily. For a simple application any engine (SQL or "noSQL") could work. The important details is that the team operating it is familiar enough with the quirks of operating the selected technology in production at a given volume. 
 
 ### Alternatives
-Other similar approaches equally stable, and well-known in the SQL space could be MariaDB or postgreSQL. 
+Other similar approaches equally stable, and well-known in the SQL space could be MariaDB, postgreSQL or AWS Aurora. 
 
 For a high performance pure key-value application we could move to Redis/ValKey with persistence enabled (both AOF Append-Only File and RDB) to ensure persistence with no dataloss (similar reliability to postgreSQL, according to their own docs). Without the highest degree of persistence we risk losing data in case of a failure of the database.
 
@@ -37,7 +37,7 @@ These counters are incremented in PUT actions. `invalid` attempts is anything th
 
 It's not a part of the assignment but a nice addition to expose also a podMonitor for monitoring this critical application.
 
-In addition to the application metrics, it exposes the go engine metrics, with internal details about how the application is performing. Here, could be interesting keeping an eye on the Garbage Collection activity. If it's too frequent, the application may see a performance boost by adding more memory. 
+In addition to the application metrics, it exposes the go engine metrics, with internal details about how the application is performing. Here, could be interesting keeping an eye on the Garbage Collection activity. If it's too frequent, the application may see a performance boost by adding more memory as a quick fix. 
 
 # Helm chart
 The helm chart includes the dependency of  the mysql database. I chose a simple upstream chart for it instead of going with the MySQL operator or any other fully fledge kubernetes-native approach to it. This decision helps scoping better the task. Also, it ensure it can be run in a `kind` cluster or similar with no additional requirements.

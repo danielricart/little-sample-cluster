@@ -314,6 +314,9 @@ When the secrets are stored in a specialized service of some kind (AWS Secret Ma
 
 # Additional niceties
 
+## container registry credentials
+A convenient feature to offer in a large cluster is to embed credentials for all the well-known container registries directly into `containerd` at a host level. this removes the need for each pod to specify the ImagePullCredentials and maintaining secrets at namespace lavel. 
+
 ## Stakater reloader
 When working with custom configurations, or refreshed secrets, we need a way to ensure the change is picked up by the consumers. 
 

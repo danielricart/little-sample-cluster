@@ -20,7 +20,15 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "0.1.2"
 
-imagePullSecrets: ["regcred"]
+# Registry credentials — iterated to produce kubernetes.io/dockerconfigjson secrets.
+# Each key is the registry hostname. Values are set at deploy time, never committed.
+# The generated secret name follows the pattern: regcred-<registry-with-dashes>
+registryCredentials: {}
+#  ghcr.io:
+#    username: ""
+#    password: ""
+
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
@@ -133,10 +141,11 @@ mysql:
       auth:
         database: users
         username: littlecluster
+        password: patata
         # rootPassword: ""       # set via --set or a values override, never committed
         # password: ""           # set via --set or a values override, never committed
         # replicationPassword: "" # set via --set or a values override, never committed
-        existingSecret: ""       # alternative: name of a pre-created K8s Secret
+        # existingSecret: ""       # alternative: name of a pre-created K8s Secret
 # apiVersion: v1
 # kind: Secret
 # metadata:

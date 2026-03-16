@@ -151,6 +151,7 @@ func TestHelloPutIntegration(t *testing.T) {
 	mux := newIntegrationMux(server)
 
 	pastDate := time.Now().AddDate(-1, 0, -1).Format("2006-01-02")
+	pastDate2 := time.Now().AddDate(-1, 0, -3).Format("2006-01-02")
 	futureDate := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
 	cases := []struct {
 		testName             string
@@ -165,6 +166,7 @@ func TestHelloPutIntegration(t *testing.T) {
 		{"valid username, wrong date", "asdasda", fmt.Sprintf(`{"dateOfBirth": "%s"}`, futureDate), http.MethodPut, http.StatusBadRequest, ""},
 		{"invalid username pattern", "asd123", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusBadRequest, ""},
 		{"valid new username", "newuser", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusNoContent, ""},
+		{"valid new username, different capitalization", "NEWuser", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate2), http.MethodPut, http.StatusNoContent, ""},
 		{"valid username existing same date", "existingusersame", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusNoContent, ""},
 		{"valid username existing different date", "existinguserdiff", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusNoContent, ""},
 	}

@@ -12,6 +12,8 @@ The details about the application implementation and design decisions are docume
 
 The details on how to run and maintain the application are found in [`RUN.md`](./RUN.md)
 
+The code can be found in [`main.go`](./main.go) as the entry point and the packages are in the folder [`pkg`](./pkg). 
+
 ## Design decisions:
 - GET response body will be:
 ```json

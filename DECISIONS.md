@@ -6,7 +6,9 @@ For a proper production setup this is probably not ideal, as the default MySQL s
 For a proper setup, it's best that the DB service is already provided, either by an independent application, or an external service. Alternative option could be to use AWS Controller for Kubernetes and provision and RDS database object. More on this is discussed in [`PRODUCTION.md`](./PRODUCTION.md)
 
 # Data model
-The datamodel of the application is clearly a key-value, using the username as the unique key of the data pair. With no further details on the usage of the service or additional information, I didn't envision the need of any sort of unique autoincremental ID for this usecase. Usernames are considerd as-is, respecting their capitalization. 
+The datamodel of the application is clearly a key-value, using the username as the unique key of the data pair. With no further details on the usage of the service or additional information, I didn't envision the need of any sort of unique autoincremental ID for this usecase.
+
+Usernames are considered case-insensitive, `oneuser` and `OneUser` are the same registry. To change this behaviour, the DB column must be created with a case-sensitive collation: `username VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_bin primary key` instead of the current one. 
 
 ## Database engine
 

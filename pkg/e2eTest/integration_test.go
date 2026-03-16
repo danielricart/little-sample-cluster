@@ -166,7 +166,6 @@ func TestHelloPutIntegration(t *testing.T) {
 		{"valid username, wrong date", "asdasda", fmt.Sprintf(`{"dateOfBirth": "%s"}`, futureDate), http.MethodPut, http.StatusBadRequest, ""},
 		{"invalid username pattern", "asd123", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusBadRequest, ""},
 		{"valid new username", "newuser", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusNoContent, ""},
-		{"valid new username, different capitalization", "NEWuser", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate2), http.MethodPut, http.StatusNoContent, ""},
 		{"valid username existing same date", "existingusersame", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusNoContent, ""},
 		{"valid username existing different date", "existinguserdiff", fmt.Sprintf(`{"dateOfBirth": "%s"}`, pastDate), http.MethodPut, http.StatusNoContent, ""},
 	}
